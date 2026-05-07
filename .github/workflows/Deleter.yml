@@ -1,0 +1,138 @@
+name: 🗑️ Clean Downloaded Videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_deletion:
+        description: 'Type "DELETE" to confirm removal of all downloads'
+        required: true
+        type: string
+
+      delete_mode:
+        description: 'What to delete?'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - videos_only
+          - audio_only
+          - by_channel
+          - by_date
+
+      channel_name:
+        description: 'Channel name (only if delete_mode = by_channel)'
+        required: false
+        type: string
+
+      date_filter:
+        description: 'Date folder (YYYY-MM-DD, only if delete_mode = by_date)'
+        required: false
+        type: string
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ✅ Verify confirmation
+        run: |
+          if [ "${{ inputs.confirm_deletion }}" != "DELETE" ]; then
+            echo "❌ Deletion not confirmed. You must type 'DELETE' to proceed."
+            exit 1
+          fi
+          echo "✅ Deletion confirmed."
+
+      - name: 🗑️ Remove downloads
+        env:
+          DELETE_MODE: ${{ inputs.delete_mode }}
+          CHANNEL_NAME: ${{ inputs.channel_name }}
+          DATE_FILTER: ${{ inputs.date_filter }}
+        run: |
+          set -e
+
+          if [ ! -d downloads ]; then
+            echo "No downloads directory found. Nothing to delete."
+            exit 0
+          fi
+
+          case "$DELETE_MODE" in
+            all)
+              echo "Deleting all downloads..."
+              rm -rf downloads/*
+              ;;
+
+            videos_only)
+              echo "Deleting video files only..."
+              find downloads -type f \( -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.avi" -o -name "*.mov" \) -delete
+              ;;
+
+            audio_only)
+              echo "Deleting audio files only..."
+              find downloads -type f \( -name "*.mp3" -o -name "*.m4a" -o -name "*.opus" -o -name "*.wav" -o -name "*.flac" \) -delete
+              ;;
+
+            by_channel)
+              if [ -z "$CHANNEL_NAME" ]; then
+                echo "❌ Channel name is required for by_channel mode."
+                exit 1
+              fi
+              echo "Deleting downloads from channel: $CHANNEL_NAME"
+              if [ -d "downloads/$CHANNEL_NAME" ]; then
+                rm -rf "downloads/$CHANNEL_NAME"
+                echo "✅ Deleted: downloads/$CHANNEL_NAME"
+              else
+                echo "⚠️ Channel folder not found: downloads/$CHANNEL_NAME"
+              fi
+              ;;
+
+            by_date)
+              if [ -z "$DATE_FILTER" ]; then
+                echo "❌ Date filter is required for by_date mode."
+                exit 1
+              fi
+              echo "Deleting downloads from date: $DATE_FILTER"
+              if [ -d "downloads/$DATE_FILTER" ]; then
+                rm -rf "downloads/$DATE_FILTER"
+                echo "✅ Deleted: downloads/$DATE_FILTER"
+              else
+                echo "⚠️ Date folder not found: downloads/$DATE_FILTER"
+              fi
+              ;;
+
+            *)
+              echo "❌ Unknown delete mode: $DELETE_MODE"
+              exit 1
+              ;;
+          esac
+
+          # Clean up empty directories
+          find downloads -type d -empty -delete 2>/dev/null || true
+
+          echo ""
+          echo "Remaining files:"
+          find downloads -type f | sort || echo "No files remaining."
+
+      - name: 📤 Commit and push changes
+        run: |
+          set -e
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add downloads
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Clean downloaded content - ${{ inputs.delete_mode }} mode"
+          git push
