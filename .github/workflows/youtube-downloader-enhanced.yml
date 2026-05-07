@@ -93,13 +93,17 @@ jobs:
 
       - name: 📝 Save URLs to file
         run: |
-          cat > urls.txt << 'EOF'
+          cat > raw_urls.txt << 'EOF'
           ${{ inputs.youtube_urls }}
           EOF
 
-          sed -i '/^[[:space:]]*$/d' urls.txt
+          tr ',' '\n' < raw_urls.txt \
+            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+            | sed '/^$/d' > urls.txt
+
           echo "URLs received:"
           cat urls.txt
+
 
       - name: ⬇️ Download videos/playlists
         env:
