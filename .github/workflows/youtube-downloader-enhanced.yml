@@ -1,0 +1,258 @@
+name: 🎬 Enhanced YouTube Downloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      youtube_urls:
+        description: 'Paste one or more YouTube URLs, one per line'
+        required: true
+        type: string
+
+      quality:
+        description: 'Download quality'
+        required: false
+        default: 'best'
+        type: choice
+        options:
+          - best
+          - 1080
+          - 720
+          - 480
+          - audio
+
+      split_threshold_mb:
+        description: 'Split files larger than this size in MB. Use 0 to disable.'
+        required: false
+        default: '90'
+        type: string
+
+      organize_by:
+        description: 'How to organize output files'
+        required: false
+        default: 'channel'
+        type: choice
+        options:
+          - channel
+          - date
+          - playlist
+          - flat
+
+      playlist_mode:
+        description: 'How to handle playlist URLs'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - first_10
+          - first_5
+          - single_only
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg zip unzip
+          python -m pip install --upgrade pip
+          pip install yt-dlp
+
+      - name: 🌐 Setup Cloudflare WARP
+        run: |
+          set -e
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update
+          sudo apt-get install -y cloudflare-warp
+
+          sudo warp-svc > /tmp/warp.log 2>&1 &
+          sleep 3
+
+          warp-cli --accept-tos registration new || true
+          warp-cli --accept-tos mode warp
+          warp-cli --accept-tos connect || true
+
+          sleep 8
+          warp-cli --accept-tos status || true
+          curl -I https://www.youtube.com || true
+
+      - name: 📝 Save URLs to file
+        run: |
+          cat > urls.txt << 'EOF'
+          ${{ inputs.youtube_urls }}
+          EOF
+
+          sed -i '/^[[:space:]]*$/d' urls.txt
+          echo "URLs received:"
+          cat urls.txt
+
+      - name: ⬇️ Download videos/playlists
+        env:
+          QUALITY: ${{ inputs.quality }}
+          ORGANIZE_BY: ${{ inputs.organize_by }}
+          PLAYLIST_MODE: ${{ inputs.playlist_mode }}
+        run: |
+          set -e
+
+          DOWNLOAD_DIR="downloads"
+          mkdir -p "$DOWNLOAD_DIR"
+
+          case "$QUALITY" in
+            best)
+              FORMAT='bestvideo+bestaudio/best'
+              EXTRA_AUDIO=""
+              ;;
+            1080)
+              FORMAT='bestvideo[height<=1080]+bestaudio/best[height<=1080]'
+              EXTRA_AUDIO=""
+              ;;
+            720)
+              FORMAT='bestvideo[height<=720]+bestaudio/best[height<=720]'
+              EXTRA_AUDIO=""
+              ;;
+            480)
+              FORMAT='bestvideo[height<=480]+bestaudio/best[height<=480]'
+              EXTRA_AUDIO=""
+              ;;
+            audio)
+              FORMAT='bestaudio/best'
+              EXTRA_AUDIO='--extract-audio --audio-format mp3'
+              ;;
+            *)
+              FORMAT='bestvideo+bestaudio/best'
+              EXTRA_AUDIO=""
+              ;;
+          esac
+
+          case "$PLAYLIST_MODE" in
+            all)
+              PLAYLIST_ARGS=""
+              ;;
+            first_10)
+              PLAYLIST_ARGS="--playlist-end 10"
+              ;;
+            first_5)
+              PLAYLIST_ARGS="--playlist-end 5"
+              ;;
+            single_only)
+              PLAYLIST_ARGS="--no-playlist"
+              ;;
+            *)
+              PLAYLIST_ARGS=""
+              ;;
+          esac
+
+          case "$ORGANIZE_BY" in
+            channel)
+              OUTTPL="$DOWNLOAD_DIR/%(uploader|Unknown Channel)s/%(title)s - www.avasam.ir - .%(ext)s"
+              ;;
+            date)
+              OUTTPL="$DOWNLOAD_DIR/%(upload_date>%Y-%m-%d|Unknown Date)s/%(title)s - www.avasam.ir - .%(ext)s"
+              ;;
+            playlist)
+              OUTTPL="$DOWNLOAD_DIR/%(playlist|No Playlist)s/%(playlist_index|NA)s - %(title)s - www.avasam.ir - .%(ext)s"
+              ;;
+            flat)
+              OUTTPL="$DOWNLOAD_DIR/%(title)s - www.avasam.ir - .%(ext)s"
+              ;;
+            *)
+              OUTTPL="$DOWNLOAD_DIR/%(uploader|Unknown Channel)s/%(title)s - www.avasam.ir - .%(ext)s"
+              ;;
+          esac
+
+          while IFS= read -r URL; do
+            [ -z "$URL" ] && continue
+
+            echo "======================================"
+            echo "Downloading: $URL"
+            echo "======================================"
+
+            yt-dlp \
+              --ignore-errors \
+              --no-overwrites \
+              --newline \
+              --embed-metadata \
+              --embed-thumbnail \
+              --format "$FORMAT" \
+              $EXTRA_AUDIO \
+              $PLAYLIST_ARGS \
+              -o "$OUTTPL" \
+              "$URL"
+          done < urls.txt
+
+          echo "Downloaded files:"
+          find "$DOWNLOAD_DIR" -type f | sort || true
+
+      - name: ✂️ Split large files if needed
+        env:
+          SPLIT_THRESHOLD_MB: ${{ inputs.split_threshold_mb }}
+        run: |
+          set -e
+
+          if [ "$SPLIT_THRESHOLD_MB" = "0" ]; then
+            echo "Splitting disabled."
+            exit 0
+          fi
+
+          THRESHOLD_BYTES=$((SPLIT_THRESHOLD_MB * 1024 * 1024))
+
+          find downloads -type f ! -name "*.zip" ! -name "*.z01" ! -name "*.z02" | while IFS= read -r FILE; do
+            SIZE=$(stat -c%s "$FILE")
+            if [ "$SIZE" -gt "$THRESHOLD_BYTES" ]; then
+              DIRNAME=$(dirname "$FILE")
+              BASENAME=$(basename "$FILE")
+              STEM="${BASENAME%.*}"
+
+              echo "Splitting large file: $FILE"
+
+              cd "$DIRNAME"
+              zip -s "${SPLIT_THRESHOLD_MB}m" -0 "${STEM}.zip" "$BASENAME"
+              rm -f "$BASENAME"
+              cd - > /dev/null
+            fi
+          done
+
+          echo "Files after splitting:"
+          find downloads -type f | sort || true
+
+      - name: 📤 Commit and push downloads
+        run: |
+          set -e
+
+          if [ ! -d downloads ]; then
+            echo "No downloads directory found."
+            exit 0
+          fi
+
+          if [ -z "$(find downloads -type f -print -quit)" ]; then
+            echo "No files downloaded."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add downloads
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Add downloaded YouTube content"
+          git push
