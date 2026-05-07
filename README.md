@@ -1,397 +1,746 @@
-# 🎬 Enhanced YouTube Downloader
-## دانلودر پیشرفته یوتیوب با GitHub Actions
+# 🎬 Enhanced YouTube Downloader | دانلودر پیشرفته یوتیوب
 
-A powerful GitHub Actions based workflow for downloading YouTube videos, playlists, and audio files automatically, organizing them neatly, splitting large files, and pushing them back to your repository.
+<div align="center">
 
-یک ورک‌فلو قدرتمند بر پایه GitHub Actions برای دانلود ویدیوها، پلی‌لیست‌ها و فایل‌های صوتی یوتیوب به‌صورت خودکار، با قابلیت دسته‌بندی، تقسیم فایل‌های بزرگ، و ذخیره در ریپازیتوری.
+![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![yt-dlp](https://img.shields.io/badge/yt--dlp-red?style=for-the-badge)
+![ffmpeg](https://img.shields.io/badge/ffmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)
+
+**Download YouTube videos automatically using GitHub Actions**
+
+**دانلود خودکار ویدیوهای یوتیوب با GitHub Actions**
+
+</div>
 
 ---
 
-# 📌 Features | ویژگی‌ها
+## 📖 Table of Contents | فهرست مطالب
 
-## English
-- Download one or multiple YouTube URLs
+- [English Guide](#english-guide)
+  - [Features](#features)
+  - [How to Fork and Setup](#how-to-fork-and-setup)
+  - [How to Use the Downloader Workflow](#how-to-use-the-downloader-workflow)
+  - [Downloader Inputs](#downloader-inputs)
+  - [How to Use the Cleanup Workflow](#how-to-use-the-cleanup-workflow)
+  - [Examples](#examples)
+  - [Important Notes](#important-notes)
+- [راهنمای فارسی](#راهنمای-فارسی)
+  - [ویژگی‌ها](#ویژگیها)
+  - [نحوه فورک و راه‌اندازی](#نحوه-فورک-و-راهاندازی)
+  - [نحوه استفاده از ورک‌فلو دانلودر](#نحوه-استفاده-از-ورکفلو-دانلودر)
+  - [ورودی‌های دانلودر](#ورودیهای-دانلودر)
+  - [نحوه استفاده از ورک‌فلو پاکسازی](#نحوه-استفاده-از-ورکفلو-پاکسازی)
+  - [مثال‌ها](#مثالها)
+  - [نکات مهم](#نکات-مهم)
+
+---
+
+# English Guide
+
+## Features
+
+- Download one or multiple YouTube links
 - Supports videos and playlists
 - Choose quality: `best`, `1080`, `720`, `480`, `audio`
-- Organize downloads by:
-  - channel
-  - date
-  - playlist
-  - flat
+- Organize files by:
+  - `channel`
+  - `date`
+  - `playlist`
+  - `flat`
 - Split large files automatically
-- Cleanup workflow for removing downloaded files
-- Uses caching for faster installs
+- Cache apt and pip dependencies for faster runs
 - Uses Cloudflare WARP for better connectivity
-
-## فارسی
-- دانلود یک یا چند لینک یوتیوب
-- پشتیبانی از ویدیو و پلی‌لیست
-- انتخاب کیفیت: `best`، `1080`، `720`، `480`، `audio`
-- دسته‌بندی فایل‌ها بر اساس:
-  - کانال
-  - تاریخ
-  - پلی‌لیست
-  - بدون دسته‌بندی
-- تقسیم خودکار فایل‌های بزرگ
-- ورک‌فلو جدا برای پاک کردن فایل‌های دانلود شده
-- استفاده از کش برای افزایش سرعت نصب
-- استفاده از Cloudflare WARP برای اتصال بهتر
+- Automatically commits downloaded files into the repository
+- Includes a cleanup workflow to remove old downloads
 
 ---
 
-# 📂 Project Structure | ساختار پروژه
-```text
-.github/
-  workflows/
-youtube-downloader.yml
-cleanup-downloads.yml
+## How to Fork and Setup
 
-downloads/
+### 1. Fork this repository
+Click the **Fork** button at the top-right of this repository.
+
+This will create your own copy of the project in your GitHub account.
 
 ---
 
-# 🚀 How to Use | نحوه استفاده
-
-## English Guide
-
-### 1. Add the workflows
-Put your workflow files inside:
-
-text
-.github/workflows/
+### 2. Open your forked repository
+After forking, open your own repository.
 
 Example:
-- `youtube-downloader.yml`
-- `cleanup-downloads.yml`
+```text
+https://github.com/YOUR_USERNAME/REPOSITORY_NAME
 
-### 2. Enable GitHub Actions permissions
+---
+
+### 3. Enable GitHub Actions
+Go to the **Actions** tab.
+
+If GitHub shows a message asking to enable workflows, click:
+
+text
+I understand my workflows, go ahead and enable them
+
+---
+
+### 4. Give workflow write permissions
 Go to:
 
-**Repository Settings → Actions → General → Workflow permissions**
+text
+Settings → Actions → General
 
-Set to:
+Scroll to **Workflow permissions** and select:
 
 text
 Read and write permissions
 
-Then save.
+Then click **Save**.
 
-### 3. Run the downloader
-Go to the **Actions** tab, choose:
+This is required because the workflow commits downloaded files back to your repository.
+
+---
+
+### 5. Make sure workflow files exist
+Your repository should contain these files:
+
+text
+.github/workflows/youtube-downloader.yml
+.github/workflows/cleanup-downloads.yml
+
+---
+
+## How to Use the Downloader Workflow
+
+### Step 1
+Go to the **Actions** tab.
+
+### Step 2
+From the left side, click:
 
 text
 🎬 Enhanced YouTube Downloader
 
-Click **Run workflow** and fill the fields.
+### Step 3
+Click the **Run workflow** button.
+
+### Step 4
+Fill in the inputs.
+
+### Step 5
+Click **Run workflow** again to start.
+
+### Step 6
+Wait for the workflow to finish.
+
+### Step 7
+After it completes, your downloaded files will be stored in:
+
+text
+downloads/
+
+inside your repository.
 
 ---
 
-## راهنمای فارسی
+## Downloader Inputs
 
-### 1. فایل‌های ورک‌فلو را اضافه کنید
-فایل‌های ورک‌فلو را داخل مسیر زیر قرار دهید:
+### `youtube_urls`
+Enter one or more YouTube links.
 
-text
-.github/workflows/
-
-مثال:
-- `youtube-downloader.yml`
-- `cleanup-downloads.yml`
-
-### 2. دسترسی GitHub Actions را فعال کنید
-به مسیر زیر بروید:
-
-**Settings → Actions → General → Workflow permissions**
-
-و گزینه زیر را انتخاب کنید:
-
-text
-Read and write permissions
-
-سپس ذخیره کنید.
-
-### 3. اجرای دانلودر
-به تب **Actions** بروید و این ورک‌فلو را انتخاب کنید:
-
-text
-🎬 Enhanced YouTube Downloader
-
-روی **Run workflow** بزنید و فیلدها را پر کنید.
-
----
-
-# 🎛 Downloader Inputs | ورودی‌های دانلودر
-
-## 1. `youtube_urls`
-### English
-Paste one or more YouTube URLs. You can put each URL on a new line.
+You can paste:
+- one link per line
+- or multiple links separated by commas
 
 Example:
 
 text
-https://www.youtube.com/watch?v=example1
-https://www.youtube.com/watch?v=example2
+https://www.youtube.com/watch?v=video1
+https://www.youtube.com/watch?v=video2
 
-### فارسی
-یک یا چند لینک یوتیوب را وارد کنید. هر لینک را می‌توانید در یک خط جداگانه قرار دهید.
-
-مثال:
+or
 
 text
-https://www.youtube.com/watch?v=example1
-https://www.youtube.com/watch?v=example2
+https://www.youtube.com/watch?v=video1,https://www.youtube.com/watch?v=video2
 
 ---
 
-## 2. `quality`
-### Options
+### `quality`
+Choose one of these:
+
 - `best`
 - `1080`
 - `720`
 - `480`
 - `audio`
 
-### English
-Select download quality.
-
-### فارسی
-کیفیت دانلود را انتخاب کنید.
-
----
-
-## 3. `split_threshold_mb`
-### English
-If a file is larger than this size, it will be split automatically into zip parts.
-
-- Default: `90`
-- Use `0` to disable splitting
-
-### فارسی
-اگر حجم فایل از این مقدار بیشتر باشد، فایل به‌صورت خودکار به چند قسمت zip تقسیم می‌شود.
-
-- مقدار پیش‌فرض: `90`
-- برای غیرفعال کردن تقسیم: `0`
+#### Meaning
+- `best` = best available quality
+- `1080` = Full HD
+- `720` = HD
+- `480` = lower size video
+- `audio` = audio only
 
 ---
 
-## 4. `organize_by`
-### Options
+### `split_threshold_mb`
+If a downloaded file is larger than this size, it will be split automatically.
+
+Example:
+
+text
+90
+
+- Default is usually `90`
+- Set `0` to disable splitting
+
+---
+
+### `organize_by`
+Choose how files should be organized:
+
 - `channel`
 - `date`
 - `playlist`
 - `flat`
 
-### English
-Controls how downloaded files are organized.
+#### Example output
 
-### فارسی
-مشخص می‌کند فایل‌ها چطور دسته‌بندی شوند.
+If `channel`:
+text
+downloads/Channel Name/video title.mp4
+
+If `date`:
+text
+downloads/2026-05-07/video title.mp4
+
+If `playlist`:
+text
+downloads/Playlist Name/01 - video title.mp4
+
+If `flat`:
+text
+downloads/video title.mp4
 
 ---
 
-## 5. `playlist_mode`
-### Options
+### `playlist_mode`
+Choose how playlist links should be handled:
+
 - `all`
 - `first_10`
 - `first_5`
 - `single_only`
 
-### English
-Controls playlist behavior.
-
-### فارسی
-مشخص می‌کند پلی‌لیست‌ها چگونه دانلود شوند.
-
----
-
-# 📁 Output Structure | ساختار فایل‌های خروجی
-
-## English
-Depending on `organize_by`, files will be saved differently.
-
-### By channel
-text
-downloads/Channel Name/video title.ext
-
-### By date
-text
-downloads/2026-05-07/video title.ext
-
-### By playlist
-text
-downloads/Playlist Name/1 - video title.ext
-
-### Flat
-text
-downloads/video title.ext
-
-## فارسی
-بسته به مقدار `organize_by`، فایل‌ها به شکل‌های مختلف ذخیره می‌شوند.
-
-### بر اساس کانال
-text
-downloads/نام کانال/نام ویدیو.ext
-
-### بر اساس تاریخ
-text
-downloads/2026-05-07/نام ویدیو.ext
-
-### بر اساس پلی‌لیست
-text
-downloads/نام پلی‌لیست/1 - نام ویدیو.ext
-
-### بدون دسته‌بندی
-text
-downloads/نام ویدیو.ext
+#### Meaning
+- `all` = download the full playlist
+- `first_10` = only first 10 videos
+- `first_5` = only first 5 videos
+- `single_only` = ignore playlist and only process a single item when possible
 
 ---
 
-# 🧹 Cleanup Workflow | ورک‌فلو پاکسازی
+## How to Use the Cleanup Workflow
 
-## English
-To remove downloaded files, run:
+If you want to remove downloaded files, use the cleanup workflow.
+
+### Step 1
+Go to the **Actions** tab.
+
+### Step 2
+Click:
 
 text
 🗑️ Clean Downloaded Videos
 
-You must type:
+### Step 3
+Click **Run workflow**
+
+### Step 4
+Fill the confirmation field with:
 
 text
 DELETE
 
-in the confirmation field.
+This is required for safety.
+
+### Step 5
+Choose a delete mode.
 
 ### Delete modes
-- `all`
-- `videos_only`
-- `audio_only`
-- `by_channel`
-- `by_date`
 
-If using:
-- `by_channel`, enter `channel_name`
-- `by_date`, enter `date_filter` in format `YYYY-MM-DD`
+- `all` → remove everything in `downloads/`
+- `videos_only` → remove only video files
+- `audio_only` → remove only audio files
+- `by_channel` → remove files from a specific channel
+- `by_date` → remove files for a specific date folder
 
-## فارسی
-برای حذف فایل‌های دانلود شده، این ورک‌فلو را اجرا کنید:
+If you choose:
 
-text
-🗑️ Clean Downloaded Videos
-
-باید در قسمت تأیید، این عبارت را دقیقاً وارد کنید:
+- `by_channel`, also fill `channel_name`
+- `by_date`, also fill `date_filter` using format:
 
 text
-DELETE
+YYYY-MM-DD
 
-### حالت‌های حذف
-- `all`
-- `videos_only`
-- `audio_only`
-- `by_channel`
-- `by_date`
+Example:
 
-اگر از این موارد استفاده می‌کنید:
-- برای `by_channel` باید `channel_name` وارد کنید
-- برای `by_date` باید `date_filter` با فرمت `YYYY-MM-DD` وارد کنید
+text
+2026-05-07
 
 ---
 
-# 📝 Example Usage | مثال استفاده
+## Examples
 
-## English
+### Download two videos in 720p
 
-### Download 2 videos in 720p
-- `youtube_urls`:
+#### Inputs
 text
+youtube_urls:
 https://www.youtube.com/watch?v=abc
 https://www.youtube.com/watch?v=def
-- `quality`: `720`
-- `split_threshold_mb`: `90`
-- `organize_by`: `channel`
-- `playlist_mode`: `single_only`
+
+quality: 720
+split_threshold_mb: 90
+organize_by: channel
+playlist_mode: single_only
+
+---
 
 ### Download audio only
-- `quality`: `audio`
 
-### Download first 5 videos from playlist
-- `playlist_mode`: `first_5`
-
-## فارسی
-
-### دانلود 2 ویدیو با کیفیت 720
-- `youtube_urls`:
+#### Inputs
 text
+youtube_urls:
 https://www.youtube.com/watch?v=abc
-https://www.youtube.com/watch?v=def
-- `quality`: `720`
-- `split_threshold_mb`: `90`
-- `organize_by`: `channel`
-- `playlist_mode`: `single_only`
 
-### دانلود فقط صدا
-- `quality`: `audio`
-
-### دانلود 5 ویدیوی اول از پلی‌لیست
-- `playlist_mode`: `first_5`
+quality: audio
+organize_by: flat
+playlist_mode: single_only
 
 ---
 
-# ⚙️ Notes | نکات
+### Download full playlist
 
-## English
-- First run may take longer because dependencies must be installed
-- Later runs are faster thanks to cache
-- Very large repositories may become slow if too many files are committed
-- Splitting large files helps avoid GitHub file size issues
+#### Inputs
+text
+youtube_urls:
+https://www.youtube.com/playlist?list=PLxxxxxx
 
-## فارسی
-- اجرای اول ممکن است بیشتر طول بکشد چون وابستگی‌ها نصب می‌شوند
-- اجرای بعدی به خاطر کش سریع‌تر خواهد بود
-- اگر تعداد فایل‌های ذخیره‌شده در ریپازیتوری زیاد شود، ممکن است ریپو کند شود
-- تقسیم فایل‌های بزرگ کمک می‌کند به محدودیت حجم فایل GitHub برخورد نکنید
+quality: best
+organize_by: playlist
+playlist_mode: all
 
 ---
 
-# ❗ Important Warning | هشدار مهم
+### Delete only audio files
 
-## English
-Please use this project responsibly and only for content you are allowed to access and store. Make sure you comply with the relevant platform terms and applicable laws.
-
-## فارسی
-لطفاً از این پروژه مسئولانه استفاده کنید و فقط برای محتوایی که مجاز به دسترسی و ذخیره‌سازی آن هستید استفاده نمایید. همچنین قوانین مربوطه و شرایط استفاده پلتفرم را رعایت کنید.
+#### Cleanup inputs
+text
+confirmation: DELETE
+delete_mode: audio_only
 
 ---
 
-# ❤️ Credits | سازنده
+### Delete files for a specific date
 
-## English
-Built with:
+#### Cleanup inputs
+text
+confirmation: DELETE
+delete_mode: by_date
+date_filter: 2026-05-07
+
+---
+
+## Important Notes
+
+- The first workflow run may take longer because dependencies are installed
+- Later runs are faster because apt and pip caches are used
+- Large numbers of downloaded files may make the repository heavy
+- Splitting helps avoid GitHub file size problems
+- Downloaded files are committed into your repository history
+- Cleanup workflow also creates a commit after deleting files
+
+---
+
+## Project Structure
+
+text
+.github/
+  workflows/
+youtube-downloader.yml
+cleanup-downloads.yml
+
+downloads/
+README.md
+
+---
+
+## Tools Used
+
 - GitHub Actions
 - Python
 - `yt-dlp`
 - `ffmpeg`
 - Cloudflare WARP
 
-## فارسی
-ساخته شده با:
-- GitHub Actions
-- Python
-- `yt-dlp`
-- `ffmpeg`
-- Cloudflare WARP
+---
+
+## Warning
+
+Use this project responsibly and only for content you are allowed to access, download, and store. Make sure your usage follows the relevant platform rules and applicable laws.
 
 ---
 
-# 📌 Suggested File Names | نام پیشنهادی فایل‌ها
+# راهنمای فارسی
+
+## ویژگی‌ها
+
+- دانلود یک یا چند لینک یوتیوب
+- پشتیبانی از ویدیو و پلی‌لیست
+- انتخاب کیفیت: `best`، `1080`، `720`، `480`، `audio`
+- دسته‌بندی فایل‌ها بر اساس:
+  - `channel`
+  - `date`
+  - `playlist`
+  - `flat`
+- تقسیم خودکار فایل‌های بزرگ
+- استفاده از کش برای افزایش سرعت اجراهای بعدی
+- استفاده از Cloudflare WARP برای اتصال بهتر
+- ثبت خودکار فایل‌های دانلود شده داخل ریپازیتوری
+- داشتن ورک‌فلو جدا برای پاکسازی دانلودها
+
+---
+
+## نحوه فورک و راه‌اندازی
+
+### 1. فورک کردن پروژه
+در بالای صفحه این ریپازیتوری، روی دکمه **Fork** کلیک کنید.
+
+با این کار یک کپی از پروژه داخل اکانت GitHub شما ساخته می‌شود.
+
+---
+
+### 2. وارد ریپازیتوری فورک‌شده خودتان شوید
+بعد از فورک، وارد ریپازیتوری خودتان شوید.
+
+مثال:
+
+text
+https://github.com/YOUR_USERNAME/REPOSITORY_NAME
+
+---
+
+### 3. فعال کردن GitHub Actions
+به تب **Actions** بروید.
+
+اگر GitHub پیامی برای فعال‌سازی ورک‌فلوها نشان داد، روی این گزینه کلیک کنید:
+
+text
+I understand my workflows, go ahead and enable them
+
+---
+
+### 4. دادن دسترسی نوشتن به ورک‌فلو
+به مسیر زیر بروید:
+
+text
+Settings → Actions → General
+
+در بخش **Workflow permissions** گزینه زیر را انتخاب کنید:
+
+text
+Read and write permissions
+
+سپس روی **Save** بزنید.
+
+این کار لازم است چون ورک‌فلو فایل‌های دانلود شده را داخل ریپازیتوری شما commit می‌کند.
+
+---
+
+### 5. مطمئن شوید فایل‌های ورک‌فلو وجود دارند
+باید این فایل‌ها داخل ریپازیتوری شما باشند:
 
 text
 .github/workflows/youtube-downloader.yml
 .github/workflows/cleanup-downloads.yml
+
+---
+
+## نحوه استفاده از ورک‌فلو دانلودر
+
+### مرحله 1
+به تب **Actions** بروید.
+
+### مرحله 2
+از سمت چپ این ورک‌فلو را انتخاب کنید:
+
+text
+🎬 Enhanced YouTube Downloader
+
+### مرحله 3
+روی دکمه **Run workflow** کلیک کنید.
+
+### مرحله 4
+ورودی‌ها را پر کنید.
+
+### مرحله 5
+دوباره روی **Run workflow** بزنید تا اجرا شروع شود.
+
+### مرحله 6
+صبر کنید تا اجرا کامل شود.
+
+### مرحله 7
+بعد از اتمام، فایل‌های دانلود شده داخل مسیر زیر قرار می‌گیرند:
+
+text
+downloads/
+
+---
+
+## ورودی‌های دانلودر
+
+### `youtube_urls`
+یک یا چند لینک یوتیوب را وارد کنید.
+
+می‌توانید:
+- هر لینک را در یک خط جدا قرار دهید
+- یا چند لینک را با ویرگول جدا کنید
+
+مثال:
+
+text
+https://www.youtube.com/watch?v=video1
+https://www.youtube.com/watch?v=video2
+
+یا
+
+text
+https://www.youtube.com/watch?v=video1,https://www.youtube.com/watch?v=video2
+
+---
+
+### `quality`
+یکی از این گزینه‌ها را انتخاب کنید:
+
+- `best`
+- `1080`
+- `720`
+- `480`
+- `audio`
+
+#### معنی گزینه‌ها
+- `best` = بهترین کیفیت موجود
+- `1080` = فول اچ‌دی
+- `720` = اچ‌دی
+- `480` = کیفیت پایین‌تر با حجم کمتر
+- `audio` = فقط صدا
+
+---
+
+### `split_threshold_mb`
+اگر حجم فایل دانلود شده از این مقدار بیشتر باشد، فایل به‌صورت خودکار تقسیم می‌شود.
+
+مثال:
+
+text
+90
+
+- مقدار پیش‌فرض معمولاً `90` است
+- برای غیرفعال کردن تقسیم، مقدار `0` بگذارید
+
+---
+
+### `organize_by`
+مشخص می‌کند فایل‌ها چگونه دسته‌بندی شوند:
+
+- `channel`
+- `date`
+- `playlist`
+- `flat`
+
+#### نمونه خروجی
+
+اگر `channel` باشد:
+text
+downloads/نام کانال/نام ویدیو.mp4
+
+اگر `date` باشد:
+text
+downloads/2026-05-07/نام ویدیو.mp4
+
+اگر `playlist` باشد:
+text
+downloads/نام پلی‌لیست/01 - نام ویدیو.mp4
+
+اگر `flat` باشد:
+text
+downloads/نام ویدیو.mp4
+
+---
+
+### `playlist_mode`
+نحوه برخورد با لینک پلی‌لیست را مشخص می‌کند:
+
+- `all`
+- `first_10`
+- `first_5`
+- `single_only`
+
+#### معنی گزینه‌ها
+- `all` = دانلود کامل پلی‌لیست
+- `first_10` = فقط 10 ویدیوی اول
+- `first_5` = فقط 5 ویدیوی اول
+- `single_only` = در صورت امکان فقط یک آیتم دانلود شود
+
+---
+
+## نحوه استفاده از ورک‌فلو پاکسازی
+
+اگر خواستید فایل‌های دانلود شده را حذف کنید، از ورک‌فلو پاکسازی استفاده کنید.
+
+### مرحله 1
+به تب **Actions** بروید.
+
+### مرحله 2
+این ورک‌فلو را انتخاب کنید:
+
+text
+🗑️ Clean Downloaded Videos
+
+### مرحله 3
+روی **Run workflow** کلیک کنید.
+
+### مرحله 4
+در فیلد تأیید، دقیقاً این عبارت را وارد کنید:
+
+text
+DELETE
+
+این مرحله برای امنیت اضافه شده است.
+
+### مرحله 5
+حالت حذف را انتخاب کنید.
+
+### حالت‌های حذف
+
+- `all` ← حذف همه چیز داخل `downloads/`
+- `videos_only` ← حذف فقط فایل‌های ویدیویی
+- `audio_only` ← حذف فقط فایل‌های صوتی
+- `by_channel` ← حذف فایل‌های مربوط به یک کانال خاص
+- `by_date` ← حذف فایل‌های مربوط به یک تاریخ خاص
+
+اگر انتخاب کنید:
+
+- `by_channel`، باید `channel_name` را هم وارد کنید
+- `by_date`، باید `date_filter` را با فرمت زیر وارد کنید:
+
+text
+YYYY-MM-DD
+
+مثال:
+
+text
+2026-05-07
+
+---
+
+## مثال‌ها
+
+### دانلود دو ویدیو با کیفیت 720
+
+#### ورودی‌ها
+text
+youtube_urls:
+https://www.youtube.com/watch?v=abc
+https://www.youtube.com/watch?v=def
+
+quality: 720
+split_threshold_mb: 90
+organize_by: channel
+playlist_mode: single_only
+
+---
+
+### دانلود فقط صدا
+
+#### ورودی‌ها
+text
+youtube_urls:
+https://www.youtube.com/watch?v=abc
+
+quality: audio
+organize_by: flat
+playlist_mode: single_only
+
+---
+
+### دانلود کامل یک پلی‌لیست
+
+#### ورودی‌ها
+text
+youtube_urls:
+https://www.youtube.com/playlist?list=PLxxxxxx
+
+quality: best
+organize_by: playlist
+playlist_mode: all
+
+---
+
+### حذف فقط فایل‌های صوتی
+
+#### ورودی‌های پاکسازی
+text
+confirmation: DELETE
+delete_mode: audio_only
+
+---
+
+### حذف فایل‌های یک تاریخ مشخص
+
+#### ورودی‌های پاکسازی
+text
+confirmation: DELETE
+delete_mode: by_date
+date_filter: 2026-05-07
+
+---
+
+## نکات مهم
+
+- اولین اجرا ممکن است طولانی‌تر باشد چون وابستگی‌ها نصب می‌شوند
+- اجراهای بعدی به خاطر کش سریع‌تر می‌شوند
+- زیاد شدن تعداد فایل‌های دانلود شده ممکن است ریپازیتوری را سنگین کند
+- تقسیم فایل‌ها به جلوگیری از مشکل محدودیت حجم GitHub کمک می‌کند
+- فایل‌های دانلود شده داخل تاریخچه ریپازیتوری commit می‌شوند
+- ورک‌فلو پاکسازی هم بعد از حذف فایل‌ها یک commit جدید ثبت می‌کند
+
+---
+
+## ساختار پروژه
+
+text
+.github/
+  workflows/
+youtube-downloader.yml
+cleanup-downloads.yml
+
+downloads/
 README.md
 
+---
 
-If you want, I can also make it:
-1. **more professional**
-2. **more красивый / fancy with badges and centered sections**
-3. **fully RTL-styled Persian section**
-4. **with screenshots section placeholders**
+## ابزارهای استفاده‌شده
+
+- GitHub Actions
+- Python
+- `yt-dlp`
+- `ffmpeg`
+- Cloudflare WARP
+
+---
+
+## هشدار
+
+لطفاً از این پروژه به‌صورت مسئولانه استفاده کنید و فقط برای محتوایی که اجازه دسترسی، دانلود و ذخیره آن را دارید از آن استفاده نمایید. همچنین مطمئن شوید استفاده شما با قوانین پلتفرم و قوانین مربوطه سازگار باشد.
