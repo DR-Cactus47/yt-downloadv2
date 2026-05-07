@@ -65,10 +65,28 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: 💾 Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-ffmpeg-warp-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-ffmpeg-warp-
+            ${{ runner.os }}-apt-
+
+      - name: 💾 Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-yt-dlp-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-yt-dlp-
+            ${{ runner.os }}-pip-
+
       - name: 📦 Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg zip unzip
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg zip unzip
           python -m pip install --upgrade pip
           pip install yt-dlp
 
@@ -77,8 +95,8 @@ jobs:
           set -e
           curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
-          sudo apt-get update
-          sudo apt-get install -y cloudflare-warp
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq cloudflare-warp
 
           sudo warp-svc > /tmp/warp.log 2>&1 &
           sleep 3
@@ -97,13 +115,10 @@ jobs:
           ${{ inputs.youtube_urls }}
           EOF
 
-          tr ',' '\n' < raw_urls.txt \
-            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-            | sed '/^$/d' > urls.txt
+          tr ',' '\n' < raw_urls.txt | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed '/^[[:space:]]*$/d' > urls.txt
 
           echo "URLs received:"
           cat urls.txt
-
 
       - name: ⬇️ Download videos/playlists
         env:
